@@ -1,0 +1,606 @@
+{
+	"info": {
+		"_postman_id": "4e651f1e-7c39-4773-9c0c-22e767298f78",
+		"name": "dmoney",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "27452892",
+		"_collection_link": "https://warped-capsule-803378.postman.co/workspace/SDET~7e9d7ace-5dc5-41b2-9b00-88706fe375a5/collection/27452892-4e651f1e-7c39-4773-9c0c-22e767298f78?action=share&creator=27452892&source=collection_link"
+	},
+	"item": [
+		{
+			"name": "User login",
+			"item": [
+				{
+					"name": "User cant login if provide wrong creds",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"User cant login if password is incorrect\", ()=>{\r",
+									"    var jsonData = pm.response.json();\r",
+									"    var actual_message = jsonData.message;\r",
+									"\r",
+									"    pm.expect(actual_message).contains(\"Password incorrect\")\r",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"agent@roadtocareer.net\",\r\n    \"password\": \"123\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/user/login",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"user",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "User can login successfully if creds are correct",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json()\r",
+									"//pm.collectionVariables.set(\"token\",jsonData.token)\r",
+									"pm.collectionVariables.set(\"token\",jsonData.token)\r",
+									"\r",
+									"pm.test(\"log in is successful\",()=>{\r",
+									"    var jsonData = pm.response.json();\r",
+									"    var actual_message = jsonData.message;\r",
+									"    console.log(actual_message)\r",
+									"    \r",
+									"    pm.expect(actual_message).contains(\"Login successfully\");\r",
+									"\r",
+									"});\r",
+									"\r",
+									"pm.test(\"User role test\", function () {\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData.role).not.eql(null);\r",
+									"});\r",
+									"pm.test(\"Status code is 200 Ok\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"agent@roadtocareer.net\",\r\n    \"password\": \"1234\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/user/login",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"user",
+								"login"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "User List",
+			"item": [
+				{
+					"name": "User List",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"If user data is showing 1\", function () {\r",
+									"    var jsonData = pm.response.json();\r",
+									"    console.log(jsonData.users[0])\r",
+									"    var id = jsonData.users[0].id\r",
+									"  //   var phonenumber = jsonData.users[0].phone_number;\r",
+									"\r",
+									"   pm.expect(id).equal(1233) // \"equal\" for comparing between exact value(preferred for numeric)\r",
+									"   //pm.expect(phonenumber).contains(\"6909\")\r",
+									"});\r",
+									"pm.test(\"If user data is showing 2\", function () {\r",
+									"    var jsonData = pm.response.json();\r",
+									"    var phone_number = jsonData.users[0].phone_number\r",
+									"    pm.expect(phone_number).contains(\"6909\") //\"contains\" for compairing between string (preferred for comparing partial value)\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseurl}}/user/list",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"user",
+								"list"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Create New User",
+			"item": [
+				{
+					"name": "Duplicate User",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"User cann't be created if email & phone number is not unique\", function () {\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData.message).to.eql(\"User already exists\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Status code is 208\", function () {\r",
+									"    pm.response.to.have.status(208);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}",
+								"type": "text"
+							},
+							{
+								"key": "X-AUTH-SECRET-KEY",
+								"value": "ROADTOSDET",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n   \"id\": 11859,\r\n        \"name\": \"Angelo Kilback Sr.\",\r\n        \"email\": \"Jalon_Hudson95@yahoo.com\",\r\n        \"password\": \"1234\",\r\n        \"phone_number\": \"01871831974\",\r\n        \"nid\": \"1110071831974\",\r\n        \"role\": \"Customer\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/user/create",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"user",
+								"create"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "User Create",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"User should create successfully\",()=>{\r",
+									"    var jsonData =pm.response.json()\r",
+									"    var user_id= jsonData.user.id\r",
+									"    var message = jsonData.message\r",
+									"\r",
+									"    pm.collectionVariables.set(\"new_user_id\",user_id)\r",
+									"    pm.environment.set(\"new_user_id\",user_id)\r",
+									"    pm.expect(message).contains(\"User created\")\r",
+									"})\r",
+									"pm.test(\"Status code is 201\", function () {\r",
+									"    pm.response.to.have.status(201);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"var prefix=\"018\";\r",
+									"var nidprefix=\"11100\";\r",
+									"\r",
+									"var randomNumber =_.random(10000000,99999999)\r",
+									"\r",
+									"var phone_number=prefix+randomNumber\r",
+									"var nid =nidprefix+randomNumber\r",
+									"\r",
+									"console.log(phone_number)\r",
+									"console.log(nid)\r",
+									"\r",
+									"pm.collectionVariables.set(\"phone_number\",phone_number)\r",
+									"pm.environment.set(\"phone_number\",phone_number)\r",
+									"pm.collectionVariables.set(\"nid\",nid)\r",
+									"pm.environment.set(\"nid\",nid)"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}",
+								"type": "text"
+							},
+							{
+								"key": "X-AUTH-SECRET-KEY",
+								"value": "ROADTOSDET",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\":\"{{$randomFullName}}\",\r\n    \"email\":\"{{$randomEmail}}\",\r\n    \"password\":\"1234\",\r\n    \"phone_number\":\"{{phone_number}}\",\r\n    \"nid\":\"{{nid}}\",\r\n    \"role\":\"Customer\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/user/create",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"user",
+								"create"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Update User",
+			"item": [
+				{
+					"name": "Update User",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"var prefix=\"018\";\r",
+									"var randomNumber =_.random(10000000,99999999)\r",
+									"var phone_number=prefix+randomNumber\r",
+									"console.log(phone_number)\r",
+									"\r",
+									"pm.collectionVariables.set(\"phone_number\",phone_number)\r",
+									"pm.environment.set(\"phone_number\",phone_number)\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"User should create successfully\",()=>{\r",
+									"    var jsonData =pm.response.json()\r",
+									"    var message = jsonData.message\r",
+									"\r",
+									"    pm.expect(message).contains(\"User updated\")\r",
+									"})\r",
+									"pm.test(\"Status code is 200 OK\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}",
+								"type": "text"
+							},
+							{
+								"key": "X-AUTH-SECRET-KEY",
+								"value": "ROADTOSDET",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\":\"{{$randomFullName}}\",\r\n    \"email\":\"{{$randomEmail}}\",\r\n    \"password\":\"1234\",\r\n    \"phone_number\":\"{{phone_number}}\",\r\n    \"nid\":\"1234567890123\",\r\n    \"role\":\"Customer\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/user/update/{{new_user_id}}",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"user",
+								"update",
+								"{{new_user_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update specific data of User",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"User should create successfully\",()=>{\r",
+									"    var jsonData =pm.response.json()\r",
+									"    var message = jsonData.message\r",
+									"\r",
+									"    pm.expect(message).contains(\"User updated\")\r",
+									"})\r",
+									"pm.test(\"Status code is 200 OK\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}",
+								"type": "text"
+							},
+							{
+								"key": "X-AUTH-SECRET-KEY",
+								"value": "ROADTOSDET",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\":\"{{$randomFullName}}\",\r\n    \"email\":\"{{$randomEmail}}\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/user/update/{{new_user_id}}",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"user",
+								"update",
+								"{{new_user_id}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Search User",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"user found status test\",()=>{\r",
+							"    var jsonData = pm.response.json();\r",
+							"    var actual_message = jsonData.message;\r",
+							"    \r",
+							"    console.log(actual_message)\r",
+							"    \r",
+							"    pm.expect(actual_message).contains(\"User found\");\r",
+							"    pm.expect(jsonData.message).to.contains(\"User found\");//another method\r",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{baseurl}}/user/search/id/{{new_user_id}}",
+					"host": [
+						"{{baseurl}}"
+					],
+					"path": [
+						"user",
+						"search",
+						"id",
+						"{{new_user_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"New user deleting test\",()=>{\r",
+							"    var jsonData = pm.response.json()\r",
+							"\r",
+							"    pm.expect(jsonData.message).to.contains(\"deleted successfully\")\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Status code is 200 OK\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{token}}",
+						"type": "text"
+					},
+					{
+						"key": "X-AUTH-SECRET-KEY",
+						"value": "ROADTOSDET",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{baseurl}}/user/delete/{{new_user_id}}",
+					"host": [
+						"{{baseurl}}"
+					],
+					"path": [
+						"user",
+						"delete",
+						"{{new_user_id}}"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseurl",
+			"value": "http://dmoney.roadtocareer.net",
+			"type": "string"
+		},
+		{
+			"key": "token",
+			"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFnZW50QHJvYWR0b2NhcmVlci5uZXQiLCJwYXNzd29yZCI6IjEyMzQiLCJpYXQiOjE2ODQ3ODExNTIsImV4cCI6MTY4NDc4Mjk1Mn0.rpgIM3WEvBnrgdShXatydbLuGJLRonoGClmjQ4G3GVc"
+		},
+		{
+			"key": "phone_number",
+			"value": "01895009771"
+		},
+		{
+			"key": "nid",
+			"value": "1110095009771"
+		},
+		{
+			"key": "new_user_id",
+			"value": 11958
+		}
+	]
+}
